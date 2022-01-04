@@ -1,5 +1,6 @@
 # ttrss-powershell
-Powershell module to interact with the TTRSS API
+Powershell module to interact with the TT-RSS API
+https://tt-rss.org/wiki/ApiReference
 
 # Functions
 ## New-Login
