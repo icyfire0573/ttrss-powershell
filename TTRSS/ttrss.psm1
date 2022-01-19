@@ -180,25 +180,40 @@ Function Get-Feeds
     ($response.Content |ConvertFrom-Json).content
 }
 
-Function Get-Feeds
+
+Function Get-Categories
 {
     [cmdletbinding()]
     param(
-        [int]$category
+       
+        [switch]$unread_only,
+        [switch]$include_empty ,
+        [switch]$enable_nested
     )
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getCategories'
+        sid = $script:session_id
+    }
 
-   
-    $requestObject = '' | Select-Object sid,op,cat_id
-    $requestObject.op = 'getFeeds'
-    $requestObject.cat_id = $category
-    $requestObject.sid = $script:session_id
+    if ($unread_only){Add-Member -InputObject $requestObject -NotePropertyName unread_only -NotePropertyValue $unread_only.IsPresent }
+    if ($include_empty){Add-Member -InputObject $requestObject -NotePropertyName include_empty -NotePropertyValue $include_empty.IsPresent }
+    if ($enable_nested){Add-Member -InputObject $requestObject -NotePropertyName enable_nested -NotePropertyValue $enable_nested.IsPresent }
+    
+
+
     $requestJson = $requestObject | ConvertTo-Json -Compress
-        $iwr = @{
+    $script:params = @{
+        uri=$script:uri
+        ContentType='application/x-www-form-urlencoded'
+        Method='POST'
+    }
+    $iwr = @{
         uri=$script:uri
         Method='POST'
     }
+    Write-Debug $requestJson
     write-verbose $requestJson   
-    $response = Invoke-WebRequest @iwr  -Body $requestJson
+    $response = Invoke-WebRequest @iwr -Body $requestJson
     #$session_id = $response
     ($response.Content |ConvertFrom-Json).content
 }
