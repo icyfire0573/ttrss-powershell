@@ -220,25 +220,83 @@ Function Get-Categories
 
 Function Get-Headlines
 {
+    <#
+.DESCRIPTION
+Get-Headlines Returns JSON-encoded list of headlines.
+
+
+.NOTES
+feed_id (integer|string) - only output articles for this feed (supports string values to retrieve tag virtual feeds since API level 18, otherwise integer)
+view_mode (string = all_articles, unread, adaptive, marked, updated)
+
+limit (integer) - limits the amount of returned articles (see below)
+skip (integer) - skip this amount of feeds first
+filter (string) - currently unused (?)
+is_cat (bool) - requested feed_id is a category
+show_excerpt (bool) - include article excerpt in the output
+show_content (bool) - include full article text in the output
+include_attachments (bool) - include article attachments ( e.g. enclosures) requires version:1.5.3
+since_id (integer) - only return articles with id greater than since_id requires version:1.5.6
+include_nested (boolean) - include articles from child categories requires version:1.6.0
+order_by (string) - override default sort order requires version:1.7.6
+sanitize (bool) - sanitize content or not requires version:1.8 (default: true)
+force_update (bool) - try to update feed before showing headlines requires version:1.14 (api 9) (default: false)
+has_sandbox (bool) - indicate support for sandboxing of iframe elements (default: false)
+include_header (bool) - adds status information when returning headlines, instead of array(articles) return value changes to array(header, array(articles)) (api 12)
+
+.LINK
+https://tt-rss.org/wiki/ApiReference
+
+#>
+
+    
     [cmdletbinding()]
     param(
         [int]$feed_id,
         [Parameter(Mandatory=$true)]
         [ValidateSet("all_articles", "unread", "adaptive", "marked", "updated")]
         [string]$view_mode,
-        [switch]$show_content
+        [int]$limit,
+        [int]$skip,
+        #[string]$filter #currently unused
+        [switch]$is_cat,
+        [switch]$show_excerpt,
+        [switch]$show_content,
+        [switch]$include_attachments,
+        [int]$since_id,
+        [switch]$include_nested,
+        [ValidateSet("date_reverse","feed_dates")]
+        [string]$order_by,
+        [switch]$sanitize,
+        [switch]$force_update,
+        [switch]$has_sandbox,
+        [switch]$include_header,
+        [string]$search,
+        [ValidateSet("all_feeds","this_feed","this_cat")]
+        [string]$search_mode
+        
     )
-    
-    $requestObject = '' | Select-Object sid,op,feed_id,view_mode 
-    $requestObject.op = 'getHeadlines'
-    $requestObject.feed_id  = $feed_id 
-    $requestObject.sid = $script:session_id
-    $requestObject.view_mode = $view_mode
-    
-    if ($show_content)
-    {
-        $requestObject | Add-Member -NotePropertyName show_content -NotePropertyValue $true
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getCategories'
+        sid = $script:session_id
     }
+
+
+    if ($limit){Add-Member -InputObject $requestObject -NotePropertyName limit -NotePropertyValue $limit }
+    if ($skip){Add-Member -InputObject $requestObject -NotePropertyName skip -NotePropertyValue $skip }
+    if ($is_cat){Add-Member -InputObject $requestObject -NotePropertyName is_cat -NotePropertyValue $is_cat.IsPresent }
+    if ($show_excerpt){Add-Member -InputObject $requestObject -NotePropertyName show_excerpt -NotePropertyValue $show_excerpt.IsPresent }
+    if ($show_content){Add-Member -InputObject $requestObject -NotePropertyName show_content -NotePropertyValue $show_content.IsPresent }
+    if ($include_attachments){Add-Member -InputObject $requestObject -NotePropertyName include_attachments -NotePropertyValue $include_attachments.IsPresent }
+    if ($since_id){Add-Member -InputObject $requestObject -NotePropertyName since_id -NotePropertyValue $since_id }
+    if ($include_nested){Add-Member -InputObject $requestObject -NotePropertyName include_nested -NotePropertyValue $include_nested.IsPresent }
+    if ($order_by){Add-Member -InputObject $requestObject -NotePropertyName order_by -NotePropertyValue $order_by }
+    if ($sanitize){Add-Member -InputObject $requestObject -NotePropertyName sanitize -NotePropertyValue $sanitize.IsPresent }
+    if ($force_update){Add-Member -InputObject $requestObject -NotePropertyName force_update -NotePropertyValue $force_update.IsPresent }
+    if ($has_sandbox){Add-Member -InputObject $requestObject -NotePropertyName has_sandbox -NotePropertyValue $has_sandbox.IsPresent }
+    if ($include_header){Add-Member -InputObject $requestObject -NotePropertyName include_header -NotePropertyValue $include_header.IsPresent }
+    if ($search){Add-Member -InputObject $requestObject -NotePropertyName search -NotePropertyValue $search }
+    if ($search_mode){Add-Member -InputObject $requestObject -NotePropertyName search_mode -NotePropertyValue $search_mode }
 
     $requestJson = $requestObject | ConvertTo-Json
     write-verbose $requestJson   
