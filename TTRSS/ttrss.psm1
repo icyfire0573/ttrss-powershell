@@ -36,6 +36,41 @@ the url for the system would be https://tiny.example.com/api/
     #$script:session_id
 }
 
+function Get-ApiLevel {
+
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getApiLevel'
+        sid = $script:session_id
+    }
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+    write-verbose $requestJson
+    $params = @{
+        uri=$script:uri
+        Method='POST'
+    }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
+function Get-Version {
+
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getVersion'
+        sid = $script:session_id
+    }
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+    write-verbose $requestJson
+    $params = @{
+        uri=$script:uri
+        Method='POST'
+    }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
+
 Function Get-Categories
 {
     [cmdletbinding()]
