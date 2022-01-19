@@ -1,4 +1,4 @@
-﻿function New-Login
+function New-Login
 {
   <#
 .DESCRIPTION
@@ -71,9 +71,23 @@ function Get-Version {
 }
 
 
-Function Get-Categories
-{
-    [cmdletbinding()]
+function Clear-Login {
+
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'logout'
+        sid = $script:session_id
+    }
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+    write-verbose $requestJson
+    $params = @{
+        uri=$script:uri
+        Method='POST'
+    }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
     param(
     )
     $requestObject = '' | Select-Object sid,op
