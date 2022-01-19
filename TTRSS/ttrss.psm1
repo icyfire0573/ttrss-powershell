@@ -106,6 +106,24 @@ function Get-Login {
     $response.content
 }
 
+
+function Get-Unread {
+
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getUnread'
+        sid = $script:session_id
+    }
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+    write-verbose $requestJson
+    $params = @{
+        uri=$script:uri
+        Method='POST'
+    }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
     param(
     )
     $requestObject = '' | Select-Object sid,op
