@@ -124,17 +124,28 @@ function Get-Unread {
     $response.content
 }
 
+
+function Get-Counters {
     param(
+        [ValidateSet("f","l","c","t")]
+        [string[]]$output_mode = @("f","l","c")
     )
-    $requestObject = '' | Select-Object sid,op
-    $requestObject.op = 'getCategories'
-    $requestObject.sid = $script:session_id
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getCounters'
+        sid = $script:session_id
+    }
     $requestJson = $requestObject | ConvertTo-Json -Compress
-    $script:params = @{
+    write-verbose $requestJson
+    $params = @{
         uri=$script:uri
-        ContentType='application/x-www-form-urlencoded'
         Method='POST'
     }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
+
     $iwr = @{
         uri=$script:uri
         Method='POST'
