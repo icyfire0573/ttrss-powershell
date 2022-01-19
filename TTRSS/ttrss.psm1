@@ -372,6 +372,81 @@ https://tt-rss.org/wiki/ApiReference
     #$script:session_id
 }
 
+
+function Get-Article {
+    param(
+        [int]$article_id
+    )
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getArticle'
+        sid = $script:session_id
+        article_id = $article_id
+    }
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+    write-verbose $requestJson
+    $params = @{
+        uri=$script:uri
+        Method='POST'
+    }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
+function Get-Config {
+    <#
+.DESCRIPTION
+Returns tt-rss configuration parameters:
+
+.NOTES
+icons_dir - path to icons on the server filesystem
+icons_url - path to icons when requesting them over http
+daemon_is_running - whether update daemon is running
+num_feeds - amount of subscribed feeds (this can be used to refresh feedlist when this amount changes)
+custom_sort_types - map of plugin-provided article sort types (API 17+)
+
+.LINK
+https://tt-rss.org/wiki/ApiReference
+
+#>
+
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getConfig'
+        sid = $script:session_id
+
+    }
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+    write-verbose $requestJson
+    $params = @{
+        uri=$script:uri
+        Method='POST'
+    }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
+function Update-Feed {
+    param(
+        [int]$feed_id 
+    )
+    $script:uri
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'updateFeed'
+        sid = $script:session_id
+        feed_id  = $feed_id 
+    }
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+    write-verbose $requestJson
+    $params = @{
+        uri=$script:uri
+        Method='POST'
+    }
+    $response = Invoke-WebRequest @params -Body $requestJson
+    $response.content
+}
+
+
 Function ConvertTo-Text {
     [cmdletbinding()]
     param(
