@@ -146,13 +146,36 @@ function Get-Counters {
 }
 
 
-    $iwr = @{
+Function Get-Feeds
+{
+    [cmdletbinding()]
+    param(
+        [int]$category,
+        [switch]$unread_only,
+        [int]$limit,
+        [int]$offset,
+        [switch]$include_nested
+    )
+
+   
+    $requestObject = New-Object -TypeName psobject -Property @{
+        op = 'getFeeds'
+        sid = $script:session_id
+    }
+
+    if ($unread_only){Add-Member -InputObject $requestObject -NotePropertyName unread_only -NotePropertyValue $unread_only.IsPresent }
+    if ($limit){Add-Member -InputObject $requestObject -NotePropertyName limit -NotePropertyValue $limit }
+    if ($offset){Add-Member -InputObject $requestObject -NotePropertyName offset -NotePropertyValue $offset }
+    if ($include_nested){Add-Member -InputObject $requestObject -NotePropertyName include_nested -NotePropertyValue $include_nested.IsPresent }
+    if ($category){Add-Member -InputObject $requestObject -NotePropertyName cat_id -NotePropertyValue $category }
+
+    $requestJson = $requestObject | ConvertTo-Json -Compress
+        $iwr = @{
         uri=$script:uri
         Method='POST'
     }
-    Write-Debug $requestJson
     write-verbose $requestJson   
-    $response = Invoke-WebRequest @iwr -Body $requestJson
+    $response = Invoke-WebRequest @iwr  -Body $requestJson
     #$session_id = $response
     ($response.Content |ConvertFrom-Json).content
 }
